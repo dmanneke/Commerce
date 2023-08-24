@@ -1,0 +1,123 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <div style="border: solid black 1px; width: 99%; text-align: center;" >
+        <div><h3>{{listing.title}}</h3></div>
+        <div> {% if listing.image_url %}<img src="{{listing.image_url}}" alt="TPAB vynil" width="300px">{% endif %}</div>
+        <div>
+            
+            <br>
+            <div><b>Description:</b></div>
+            <div>{{listing.description}}</div>
+            <br>
+            <br>
+            <div><b>Seller:</b></div>
+            <div>{{listing.user_id.username}}</div>
+            <br>
+            <div><b>Current Best Bid:</b>   {{listing.max_bid}}$</div>
+            <br>
+        </div>
+        <br>
+
+        {% if listing.user_id.id == user_id and listing.status%}
+            <div>
+                <form action="{% url 'listing' listing.id %}" method="post"> 
+                    {% csrf_token %}
+                    <input type="submit" value="Close Auction" name="close_auction">
+                </form>   
+            </div>
+        {% endif %}
+
+        <div>
+            {% if listing.winner%}
+                {% if listing.winner.id == user_id %}
+                    <h1>You are the winner of this auction!</h1>
+                {% else %}
+                    <h1>{{listing.winner.username}} won this auction!</h1>
+                {% endif %}
+            {% endif %}
+        </div>
+
+            
+        {% if logged_in and listing.user_id.id != user_id and not listing.winner.id%}
+            <div>
+                {% if not listing in watchlist %}
+                    <form action="{% url 'watchlist' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" value="{{listing.id}}" name="add">Add to watchlist</button>
+                    </form>
+                {% else %}
+                    <form action="{% url 'watchlist' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" value="{{listing.id}}" name="remove">Remove from watchlist</button>
+                    </form>
+                {% endif %}
+            </div>
+            <br>
+            <br>
+
+            <h3>Place Bid</h3>
+            <div>.{% if message %}{{message}}{% endif %}</div>
+            <div>
+                <form action="{% url 'listing' listing.id%}" method="post">
+                    {% csrf_token %}
+                    <input type="number" step=".01" name="bid" placeholder="Bid" required>
+                    <input type="submit" value="Place Bid">
+                </form>
+            </div>
+            <br>
+            <ul style="list-style-type: none;">
+                {% for bid in bids %}
+                    <li>
+                        Bid: {{bid.value}}$ (by User: {{bid.user_id.username}})
+                        {% if user_id == bid.user_id.id %}
+                            <form action="{% url 'listing' listing.id%}" method="post" style="display: inline">
+                                {% csrf_token %}
+                                <button type="submit" value="{{bid.id}}" name="remove_bid">Remove Bid</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                    <br>
+                {% endfor %}
+                <li>Starting Bid: {{ listing.starting_bid }}$</li>
+            </ul>
+        {% endif %}
+        <br>
+        <br>
+
+        <h3>Comments</h3>
+        {% if logged_in %}
+            <div>
+                <form action="{% url 'listing' listing.id%}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <textarea style="height: 10vh; width: 40%;" name="content" placeholder="Type Comment Here"></textarea>
+                    <br>
+                    <input type="submit" value="Place Comment">
+                </form>
+            </div>
+        {% endif %}
+        <br>
+        <br>
+
+        <div>
+            <ul style="list-style-type: none;">
+                {% for comment in comments %}
+                    <li>{{comment.content}}</li>
+                    <li>{{comment.time}}
+                        {% if comment.user_id.id == user_id %}
+                            <form action="{% url 'listing' listing.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" value="{{ comment.id }}" name="remove_comment">Remove Comment</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                    <br>
+                {% endfor %}
+            </ul>
+        </div>
+        
+    <div>
+
+
+{% endblock %}

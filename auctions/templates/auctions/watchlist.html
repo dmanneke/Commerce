@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Watchlist</h2>            
+
+    <ul>
+    {% for listing in watchlist %}
+        <div style="border: solid black 1px; width: 99%;" class="row">
+            <div class="col-3"> {% if listing.image_url %}<img src="{{listing.image_url}}" alt="TPAB vynil" width="200px">{% endif %}</div>
+            <div class="col-1"></div>
+            <div class="col-8">
+                <div><a href="{% url 'listing' listing.id %}"><h3>{{listing.title}}</h3></a></div>
+                <br>
+                <div><b>Description:</b></div>
+                <div>{{listing.description}}</div>
+                <br>
+                <div><b>Current Best Bid:</b>   {{listing.starting_bid}}$</div>
+                <br>
+            </div>
+        </div>
+        <br>
+    {% endfor %}
+    </ul>
+
+{% endblock %}
